@@ -131,9 +131,9 @@ func (ctrl *ProjectsController) Store(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.ProjectsSave); !ok {
 		return
 	}
-	adminId := uint64(1)
+	adminInfo := auth.CurrentAdmin(c)
 	projectsModel := projects.Projects{
-		AdminId:       &adminId,
+		AdminId:       &adminInfo.ID,
 		SerialNo:      &request.SerialNo,
 		Title:         &request.Title,
 		Description:   &request.Description,
