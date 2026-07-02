@@ -156,7 +156,7 @@ cd web && npm run dev
 
 ## API 配置站点
 
-2 分钟完成配置：[API 聚合站点](https://api.lingguoai.com/pricing)
+2 分钟完成配置：[API 聚合站点](https://www.zdom.cn/pricing)
 
 ## 项目社群
 
