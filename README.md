@@ -1,247 +1,163 @@
-markdown
-# 🎬 灵果AI (LingGuo AI) 
+# 灵果短剧 / spiritFruit
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Stars](https://img.shields.io/github/stars/YourUsername/LingGuo-Drama?style=social)](https://github.com/YourUsername/LingGuo-Drama)
-[![Forks](https://img.shields.io/github/forks/YourUsername/LingGuo-Drama?style=social)](https://github.com/YourUsername/LingGuo-Drama)
+灵果短剧是一个面向 AI 短剧、动漫和视频创作的开源项目。项目提供从剧本、角色、场景、分镜到图片/视频生成和片段合并的后台工作台，适合用来搭建可二次开发的 AIGC 视频生产流程。
 
-> **全球领先的开源 AI 短剧与 AI 动漫自动化创作平台** | **Open Source AI Short Drama & Anime Generator**
+## 功能概览
 
-**灵果AI (LingGuo AI)** 是一个专注于 **AIGC 视频生成**的开源项目，致力于为创作者提供从“文本到视频 (Text-to-Video)”的一站式解决方案。无论你是想制作跌宕起伏的**AI短剧**，还是想创作画风精美的**AI动漫**，灵果AI 都能通过自动化分镜、角色一致性保持、AI配音与视频合成技术，帮你将创意瞬间转化为视觉盛宴。
+- 剧本管理：支持剧本录入、AI 生成和章节化创作。
+- 角色/场景/道具：从剧本中提取实体并生成对应素材。
+- 分镜工作流：拆分分镜、生成帧提示词、生成分镜图片和视频。
+- 视频合成：基于 FFmpeg 合并分镜视频片段。
+- 异步任务：使用 Redis + Asynq 处理 AI 生成和视频合成任务。
+- 管理后台：Vue 3 + Vite + TDesign 前端工作台。
 
-[📖 官方文档 (Docs)]() | [🌐 在线体验 (Demo)](http://www.lingguoai.com/) | [💬 加入社区 (Discord/WeChat)]()
+## 技术栈
 
----
+| 模块 | 技术 |
+| --- | --- |
+| 后端 | Go、Gin、GORM、Cobra |
+| 前端 | Vue 3、Vite、TDesign、Pinia |
+| 数据库 | MySQL 8+ |
+| 队列/缓存 | Redis、Asynq |
+| 视频处理 | FFmpeg |
+| 部署 | Docker Compose、Nginx |
 
-## 🔍 为什么选择灵果AI？(Why LingGuo AI?)
+## Docker 快速启动
 
-在 AIGC 爆发的时代，制作短剧和动漫的门槛正在被打破。灵果AI 作为一款完全**开源免费**的工具，解决了传统 AI 视频创作中流程繁琐、角色不连贯、分镜难控制等痛点。
-
-### ✨ 核心特性 (Key Features)
-
-* 📝 **剧本到视频 (Script-to-Video)**：输入大纲或剧本，LLM 自动拆解分镜提示词（Prompt）。
-* 🎭 **极致的角色一致性 (Character Consistency)**：内置先进的 LoRA 和 ControlNet 调度策略，确保同角色在不同镜头下长相、服装一致。
-* 🎨 **专精 AI 短剧与动漫模型**：集成针对**竖屏短剧**、**日系动漫 (Anime)**、**国风3D**等场景优化的视觉生成管线。
-* 🗣️ **智能情感配音 (AI Voiceover & Lipsync)**：一键生成带有情感的 TTS 语音，并支持唇形同步 (Wav2Lip/SadTalker)。
-* 🎞️ **自动化后期合成 (Auto Video Editing)**：自动匹配转场特效、背景音乐 (BGM) 和音效，一键导出 MP4。
-* 🧩 **高度可扩展的插件系统**：轻松接入 ComfyUI 工作流、Stable Video Diffusion (SVD)、Runway、Sora 等底层大模型 API。
-
-### 💡 应用场景 (Use Cases)
-
-* 🎬 **爆款 AI 短剧制作**：快速批量生产网文改短剧，抢占短视频平台流量红利。
-* 🌸 **个人 AI 动漫连载**：画渣也能做导演，独立完成原创连载动漫的画面与配音。
-* 📚 **小说推文视频化**：小说作者/推文博主实现“图文转视频”的高效变现。
-* 📺 **商业广告与 MV**：低成本制作产品宣发视频、音乐 MV 视觉切片。
-
-### 🗺️ 发展路线图 (Roadmap)
-
-* [x] V 0.1: 核心 Text-to-Image 工作流搭建完成。
-* [x] V 0.2: 接入 AI 配音引擎与一键视频合成模块。
-* [ ] V 0.5: 推出专属“角色一致性”解决方案及动漫专用 Checkpoint。
-* [ ] V 1.0: 完善多语言支持，推出可视化分镜编辑器 (Storyboard Editor)。
-* [ ] V 2.0: 深度集成 AI 视频大模型 (如 Veo/Sora 类模型 API)，实现全时长动态生成。
-
----
-
-## 🚀 快速开始 (Quick Start)
-
-灵果 AI 采用现代化的前后端分离架构。后端基于 **Go** 构建，保障高并发下的视频合成与异步任务调度；前端基于 **Vue 3 + Vite**，提供丝滑的专业级视频剪辑轨道交互体验。
-
-### 📋 环境要求 (Prerequisites)
-
-| 依赖/软件 | 版本要求 | 说明 |
-| :--- | :--- | :--- |
-| **Go** | 1.20+ | 后端核心运行环境 |
-| **Node.js** | 18+ | 前端构建与开发环境 (推荐使用 `pnpm`) |
-| **MySQL** | 8.0+ | 核心业务数据库 |
-| **Redis** | 6.0+ | **必需**，用于 Asynq 异步任务队列与缓存 |
-| **FFmpeg** | 4.0+ | **必需**，用于底层的视频合并、转场与音频处理 |
-
-#### 🔧 安装 FFmpeg
-视频合成强依赖 FFmpeg，请确保安装并将其添加到系统环境变量中：
-* **macOS**: `brew install ffmpeg`
-* **Ubuntu/Debian**: `sudo apt update && sudo apt install ffmpeg`
-* **Windows**: 从 [FFmpeg 官网](https://ffmpeg.org/download.html) 下载并配置环境变量。
-* **验证安装**: 在终端运行 `ffmpeg -version`
-
----
-
-### 📦 1. 获取代码
+推荐先用 Docker Compose 启动完整环境：
 
 ```bash
-# 克隆灵果AI仓库
-git clone [https://github.com/LingGuoAI/LingGuo-Drama.git](https://github.com/LingGuoAI/LingGuo-Drama.git)
-cd LingGuo-Drama
-
-```
-
-### ⚙️ 2. 后端部署 (Server Setup)
-
-后端包含 RESTful API 接口与基于 Asynq 的异步视频生成/合并任务引擎。
-
-```bash
-# 进入后端目录
-cd server
-
-# 1. 复制环境变量配置文件
 cp .env.example .env
-
+docker compose up -d --build
 ```
 
-**编辑 `.env` 文件**，配置您的数据库、Redis 和大模型 API Key：
+启动后访问：
 
-> **注意**：请先在您的 MySQL 中手动创建一个名为 `spirit_fruit` 的空数据库 (`CREATE DATABASE spirit_fruit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`)。
+- 前端：http://localhost
+- 后端健康检查：http://localhost:8080/healthz
+- 后端就绪检查：http://localhost:8080/readyz
+- API 文档入口：http://localhost/docs/index.html
 
-```ini
-# 数据库配置
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=spirit_fruit
-DB_USERNAME=root
-DB_PASSWORD=您的数据库密码
+默认管理员：
 
-# Redis 配置 (用于任务队列)
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-REDIS_PASSWORD=您的Redis密码
+- 账号：`admin`
+- 密码：`123456`
 
-# AI 模型配置 (根据需要填入)
-OPENAI_API_KEY=sk-xxxxxx
-VOLCES_API_KEY=xxxxxx
+后端首次启动会自动执行 GORM AutoMigrate，并在空库中初始化默认管理员和系统菜单。
 
-```
+更多部署、备份、更新和排障命令见 [Docker 部署指南](docs/deployment.md)。
 
-**启动后端服务：**
+## 本地开发
+
+### 环境要求
+
+- Go 1.25+
+- Node.js 18+
+- MySQL 8.0+
+- Redis 6.0+
+- FFmpeg 4.0+
+
+### 后端
 
 ```bash
-# 下载 Go 依赖
-go mod tidy
-
-# 启动服务
+cd server
+cp .env.example .env
+go mod download
 go run main.go serve
-
 ```
 
-> **💡 自动化建表提示**：项目内置了 GORM 自动迁移（AutoMigrate）。只要数据库连接成功，**首次启动时会自动创建所有数据表，并播种默认的管理员账号与系统菜单**。
-> * 默认超级管理员账号：`admin`
-> * 默认超级管理员密码：`123456`
->
->
+后端默认监听 `8080`，配置来自 `server/.env`。
 
----
-
-### 🎨 3. 前端部署 (Web Setup)
-
-请打开一个**新的终端窗口**，进入前端目录：
+异步任务 Worker 需单独启动：
 
 ```bash
-# 进入前端目录
-cd web
-
-# 1. 安装前端依赖 (推荐使用 pnpm，如果没有请先 npm install -g pnpm)
-pnpm install
-
-# 2. 启动开发服务器
-pnpm run dev
-
+cd server
+go run main.go worker
 ```
 
-启动成功后，浏览器访问终端提示的地址（通常是 `http://localhost:3002`）。
-输入刚才自动生成的默认账号 `admin` 和密码 `123456`，即可开启您的 AI 短剧创作之旅！
+请确保 MySQL 中存在数据库：
 
----
+```sql
+CREATE DATABASE spirit_fruit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-## 🏭 生产环境部署 (Production Deployment)
-
-在生产环境中，建议将前后端分别构建并使用 Nginx 进行反向代理。
-
-### 1. 编译构建
+### 前端
 
 ```bash
-# 构建前端
 cd web
-pnpm run build
-# 构建产物将在 web/dist 目录下
-
-# 编译后端
-cd ../server
-go build -o spirit-fruit-server main.go
-
+npm install
+npm run dev
 ```
 
-### 2. 使用 Systemd 守护后端进程
-
-创建 `/etc/systemd/system/spirit-fruit.service`：
+前端开发服务默认监听 `3002`，开发环境接口配置在 `web/.env.development`：
 
 ```ini
-[Unit]
-Description=LingGuo-Drama Server
-After=network.target mysql.service redis.service
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/LingGuo-Drama/server
-ExecStart=/opt/LingGuo-Drama/server/spirit-fruit-server serve
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-
+VITE_API_URL=http://localhost:8080
+VITE_API_URL_PREFIX=/admin/v1
 ```
 
-运行：`sudo systemctl enable --now spirit-fruit`
+## 关键配置
 
-### 3. Nginx 反向代理配置参考
+后端常用配置在 `server/.env.example` 和根目录 `.env.example` 中维护：
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
+| 变量 | 说明 |
+| --- | --- |
+| `APP_PORT` | 后端监听端口 |
+| `APP_KEY` | 应用密钥，生产环境必须修改 |
+| `DB_HOST` / `DB_DATABASE` | MySQL 地址和库名 |
+| `REDIS_HOST` / `REDIS_PASSWORD` | Redis 地址和密码 |
+| `REDIS_MAIN_DB` | 业务 Redis DB |
+| `REDIS_CACHE_DB` | 缓存 Redis DB |
+| `REDIS_ASYNC_DB` | Asynq 队列 Redis DB |
+| `AI_PROVIDER` | 默认文本/图片模型提供商 |
+| `VIDEO_PROVIDER` | 默认视频生成提供商 |
 
-    # 前端静态文件
-    location / {
-        root /opt/LingGuo-Drama/web/dist;
-        index index.html;
-        try_files $uri $uri/ /index.html;
-    }
+AI 服务相关 Key 可按实际 provider 填写，例如 `OPENAI_API_KEY`、`GETGOAPI_API_KEY`、`VOLCES_API_KEY`、`MINIMAX_API_KEY`。
 
-    # 后端 API 代理
-    location /api/ {
-        proxy_pass [http://127.0.0.1:8080/](http://127.0.0.1:8080/);
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
+## 创作链路
 
-    # 本地生成的视频与图片资源访问
-    location /uploads/ {
-        alias /opt/LingGuo-Drama/server/uploads/;
-        # 允许跨域以便视频播放
-        add_header Access-Control-Allow-Origin *; 
-    }
-}
+1. 创建短剧项目。
+2. 创建或 AI 生成剧本。
+3. 提取角色、场景、道具。
+4. 生成角色图、场景图、道具图。
+5. 拆分分镜并生成帧提示词。
+6. 生成分镜图片和视频。
+7. 合并片段并导出成片。
 
+项目流程梳理和可落地的改进建议见 [项目流程梳理与改进方案](docs/process-improvements.md)。
+
+## 常用命令
+
+```bash
+# 查看容器状态
+docker compose ps
+
+# 查看后端日志
+docker compose logs -f server
+
+# 查看异步任务日志
+docker compose logs -f worker
+
+# 停止服务
+docker compose down
+
+# 本地后端启动
+cd server && go run main.go serve
+
+# 本地前端启动
+cd web && npm run dev
 ```
 
----
+## 安全提醒
 
-## API 配置站点
+- 不要提交 `.env`、API Key、数据库备份和生成文件。
+- 生产环境必须修改默认的 `APP_KEY`、数据库密码、Redis 密码和默认管理员密码。
+- 如果密钥曾经提交或泄漏，请立即吊销并重新生成。
 
-2 分钟完成配置：[API 聚合站点](https://api.lingguoai.com/pricing)
+## 参与贡献
 
-📢 灵果短剧 (Lingo Short Video) 项目社群
+欢迎提交 Issue 和 Pull Request。建议优先补充部署体验、任务状态可观测性、API 契约、测试和工作台流程体验。
 
-![灵果短剧交流群二维码](https://img.aiaiapi.com/zhoudao.png)
+## License
 
-## 🤝 参与贡献 (Contributing)
-
-灵果AI 是一个由社区驱动的开源项目。我们非常欢迎各位开发者、提示词工程师和视频创作者加入我们！
-如果您有任何好点子或发现了 Bug，欢迎提交 Pull Requests 或发布 Issues。
-
-## 📄 开源协议 (License)
-
-本项目基于 MIT License 开源。欢迎免费用于商业或个人项目，但请保留原作者署名。
-
+MIT

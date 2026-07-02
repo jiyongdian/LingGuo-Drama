@@ -21,7 +21,7 @@ func GetClient() *asynq.Client {
 		redisOpt := asynq.RedisClientOpt{
 			Addr:     fmt.Sprintf("%v:%v", config.GetString("redis.host"), config.GetString("redis.port")),
 			Password: config.GetString("redis.password"),
-			DB:       config.GetInt("redis.database_asynq"),
+			DB:       config.GetInt("redis.database_async"),
 		}
 		client = asynq.NewClient(redisOpt)
 	})

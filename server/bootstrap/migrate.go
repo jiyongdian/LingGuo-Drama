@@ -44,6 +44,7 @@ func SetupAutoMigrate() {
 		&sys_base_menus.SysBaseMenus{},
 		&ai_config.AiConfig{},
 		&async_tasks.AsyncTask{},
+		&async_tasks.AsyncTaskEvent{},
 		&characters.Characters{},
 		&props.Props{},
 		&scenes.Scenes{},

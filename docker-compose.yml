@@ -1,0 +1,175 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: spiritfruit-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-spiritfruit_root}
+      MYSQL_DATABASE: ${DB_DATABASE:-spirit_fruit}
+      MYSQL_USER: ${DB_USERNAME:-spiritfruit}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-spiritfruit_pass}
+      TZ: ${TIMEZONE:-Asia/Shanghai}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: spiritfruit-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-spiritfruit_redis}"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD:-spiritfruit_redis} ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: spiritfruit-server
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_PORT: 8080
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_KEY: ${APP_KEY:-change-me-in-production}
+      TIMEZONE: ${TIMEZONE:-Asia/Shanghai}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-spirit_fruit}
+      DB_USERNAME: ${DB_USERNAME:-spiritfruit}
+      DB_PASSWORD: ${DB_PASSWORD:-spiritfruit_pass}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-spiritfruit_redis}
+      REDIS_MAIN_DB: ${REDIS_MAIN_DB:-1}
+      REDIS_CACHE_DB: ${REDIS_CACHE_DB:-2}
+      REDIS_ASYNC_DB: ${REDIS_ASYNC_DB:-0}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_TYPE: ${LOG_TYPE:-single}
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      OPENAI_IMAGE_MODEL: ${OPENAI_IMAGE_MODEL:-dall-e-3}
+      GETGOAPI_BASE_URL: ${GETGOAPI_BASE_URL:-https://api.lingguoai.com/v1}
+      GETGOAPI_API_KEY: ${GETGOAPI_API_KEY:-}
+      GETGOAPI_MODEL: ${GETGOAPI_MODEL:-gpt-4o}
+      GETGOAPI_IMAGE_MODEL: ${GETGOAPI_IMAGE_MODEL:-gpt-4o-image}
+      VIDEO_PROVIDER: ${VIDEO_PROVIDER:-getgoapi}
+      VOLCES_API_KEY: ${VOLCES_API_KEY:-}
+      MINIMAX_API_KEY: ${MINIMAX_API_KEY:-}
+      RUNWAY_API_KEY: ${RUNWAY_API_KEY:-}
+      PIKA_API_KEY: ${PIKA_API_KEY:-}
+      VERTEX_API_KEY: ${VERTEX_API_KEY:-}
+      VERTEX_PROJECT_ID: ${VERTEX_PROJECT_ID:-}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    volumes:
+      - server-uploads:/app/uploads
+      - server-storage:/app/storage
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/readyz"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: spiritfruit-worker
+    restart: unless-stopped
+    command: ["spiritfruit", "worker"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_PORT: 8080
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_KEY: ${APP_KEY:-change-me-in-production}
+      TIMEZONE: ${TIMEZONE:-Asia/Shanghai}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-spirit_fruit}
+      DB_USERNAME: ${DB_USERNAME:-spiritfruit}
+      DB_PASSWORD: ${DB_PASSWORD:-spiritfruit_pass}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-spiritfruit_redis}
+      REDIS_MAIN_DB: ${REDIS_MAIN_DB:-1}
+      REDIS_CACHE_DB: ${REDIS_CACHE_DB:-2}
+      REDIS_ASYNC_DB: ${REDIS_ASYNC_DB:-0}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_TYPE: ${LOG_TYPE:-single}
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      OPENAI_IMAGE_MODEL: ${OPENAI_IMAGE_MODEL:-dall-e-3}
+      GETGOAPI_BASE_URL: ${GETGOAPI_BASE_URL:-https://api.lingguoai.com/v1}
+      GETGOAPI_API_KEY: ${GETGOAPI_API_KEY:-}
+      GETGOAPI_MODEL: ${GETGOAPI_MODEL:-gpt-4o}
+      GETGOAPI_IMAGE_MODEL: ${GETGOAPI_IMAGE_MODEL:-gpt-4o-image}
+      VIDEO_PROVIDER: ${VIDEO_PROVIDER:-getgoapi}
+      VOLCES_API_KEY: ${VOLCES_API_KEY:-}
+      MINIMAX_API_KEY: ${MINIMAX_API_KEY:-}
+      RUNWAY_API_KEY: ${RUNWAY_API_KEY:-}
+      PIKA_API_KEY: ${PIKA_API_KEY:-}
+      VERTEX_API_KEY: ${VERTEX_API_KEY:-}
+      VERTEX_PROJECT_ID: ${VERTEX_PROJECT_ID:-}
+    volumes:
+      - server-uploads:/app/uploads
+      - server-storage:/app/storage
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ""
+        VITE_API_URL_PREFIX: /admin/v1
+    container_name: spiritfruit-web
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    ports:
+      - "${WEB_PORT:-80}:80"
+    volumes:
+      - server-uploads:/usr/share/nginx/html/uploads:ro
+
+volumes:
+  mysql-data:
+  redis-data:
+  server-uploads:
+  server-storage:

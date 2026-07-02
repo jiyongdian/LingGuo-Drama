@@ -4,6 +4,7 @@ package bootstrap
 import (
 	"net/http"
 	"spiritFruit/app/http/middlewares"
+	"spiritFruit/pkg/readiness"
 	"spiritFruit/routes"
 	"strings"
 
@@ -17,6 +18,24 @@ func SetupRoute(router *gin.Engine) {
 
 	// 注册全局中间件
 	registerGlobalMiddleWare(router)
+
+	router.GET("/healthz", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+		})
+	})
+	router.GET("/readyz", func(c *gin.Context) {
+		ready, checks := readiness.Run()
+		status := http.StatusOK
+		if !ready {
+			status = http.StatusServiceUnavailable
+		}
+
+		c.JSON(status, gin.H{
+			"ready":  ready,
+			"checks": checks,
+		})
+	})
 
 	// 注册 Swagger 处理器
 	registerSwagger(router)

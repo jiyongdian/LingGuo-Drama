@@ -1,9 +1,11 @@
 server/uploads
 server/storage
 server/.env
+/.env
 server/.idea
 server/.DS_Store
 .DS_Store
 web/node_modules
 web/dist
+web/.env.local
 web/.DS_Store

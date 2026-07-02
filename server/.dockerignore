@@ -1,0 +1,7 @@
+.env
+.idea
+.DS_Store
+storage
+uploads
+tmp
+*.log

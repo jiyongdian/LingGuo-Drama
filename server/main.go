@@ -6,11 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/hibiken/asynq"
 	"github.com/spf13/cobra"
 
 	"spiritFruit/app/cmd"
-	"spiritFruit/app/jobs"
 	"spiritFruit/bootstrap"
 	btsConfig "spiritFruit/config"
 	"spiritFruit/pkg/appctx"
@@ -47,25 +45,6 @@ func main() {
 
 			// 2. 初始化 Asynq 客户端 (用于投递任务)
 			myAsynq.GetClient()
-
-			mux := asynq.NewServeMux()
-			mux.HandleFunc(myAsynq.TypeGenerateScript, jobs.HandleGenerateScript)
-			mux.HandleFunc(myAsynq.TypeGenerateImage, jobs.HandleGenerateImage)
-			mux.HandleFunc(myAsynq.TypeGenerateCharacters, jobs.HandleGenerateCharacters)
-			mux.HandleFunc(myAsynq.TypeExtractScenes, jobs.HandleExtractScenes)
-			mux.HandleFunc(myAsynq.TypeGenerateSceneImage, jobs.HandleGenerateSceneImage)
-			mux.HandleFunc(myAsynq.TypeGenerateShots, jobs.HandleGenerateShots)
-			mux.HandleFunc(myAsynq.TypeExtractProps, jobs.HandleExtractPropsTask)
-			mux.HandleFunc(myAsynq.TypeGeneratePropImage, jobs.HandleGeneratePropImageTask)
-			mux.HandleFunc(myAsynq.TypeExtractFramePrompt, jobs.HandleExtractFramePromptTask)
-			mux.HandleFunc(myAsynq.TypeGenerateFrameImage, jobs.HandleGenerateFrameImageTask)
-			mux.HandleFunc(myAsynq.TypeGenerateVideo, jobs.HandleGenerateVideoTask)
-			mux.HandleFunc(myAsynq.TypeMergeVideo, jobs.HandleMergeVideoTask)
-
-			// 4. 启动 Asynq Server (消费者)
-			// 使用 goroutine 启动，避免阻塞主线程（Web Server）
-			// 传入 appctx 获取的全局 context，用于优雅关闭
-			go myAsynq.StartServer(appctx.GetContext(), mux)
 		},
 
 		// PersistentPostRun 在命令执行结束后运行
@@ -81,6 +60,7 @@ func main() {
 		cmd.CmdServe,
 		cmd.CmdKey,
 		cmd.CmdCache,
+		cmd.CmdWorker,
 	)
 
 	// 注册默认命令 (serve)

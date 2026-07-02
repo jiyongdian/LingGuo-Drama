@@ -84,6 +84,7 @@ func RegisterAdminAPIRoutes(r *gin.Engine) {
 			videoController := new(controllers.VideoController)
 			aiController := new(controllers.AiController)
 			tasksGroup.GET("/:id", tasksController.Show)                                                // 查询任务详情(包含进度和结果)
+			tasksGroup.POST("/:id/cancel", tasksController.Cancel)                                      // 取消任务
 			tasksGroup.POST("/generateCharacters", aiController.GenerateCharacters)                     // 提取角色
 			tasksGroup.POST("/extractScenes", aiController.ExtractScenes)                               // 提取场景
 			tasksGroup.POST("/generateCharacterImage", aiController.GenerateCharacterImage)             // 单个角色生图

@@ -28,6 +28,9 @@ func (s *TaskService) CreateScriptGenerationTask(adminID, projectID, scriptID ui
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 将数据库 ID 注入 Payload
 	payload.AsyncTaskID = task.ID
@@ -63,6 +66,9 @@ func (s *TaskService) CreateImageGenerationTask(adminID, projectID, charID uint6
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 注入 ID
 	payload.AsyncTaskID = task.ID
@@ -96,6 +102,9 @@ func (s *TaskService) CreateGenerateCharactersTask(adminID, projectID uint64, co
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 将数据库 ID 注入 Payload
 	payload.AsyncTaskID = task.ID
@@ -128,6 +137,9 @@ func (s *TaskService) CreateExtractScenesTask(adminID, projectID, scriptId uint6
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 注入 ID
 	payload.AsyncTaskID = task.ID
@@ -162,6 +174,9 @@ func (s *TaskService) CreateSceneImageGenerationTask(adminID, projectID, sceneID
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 将数据库 ID 注入 Payload
 	payload.AsyncTaskID = task.ID
@@ -196,6 +211,9 @@ func (s *TaskService) CreateGenerateShotsTask(adminID, projectID, scriptID uint6
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 注入 Task ID
 	payload.AsyncTaskID = task.ID
@@ -230,6 +248,9 @@ func (s *TaskService) CreatePropImageGenerationTask(adminID, projectID, propID u
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 注入 AsyncTaskID
 	payload.AsyncTaskID = task.ID
@@ -261,6 +282,9 @@ func (s *TaskService) CreateExtractPropsTask(adminID, projectID, episodeID uint6
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	payload.AsyncTaskID = task.ID
 
@@ -294,6 +318,9 @@ func (s *TaskService) CreateExtractFramePromptTask(adminID, projectID, shotID ui
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 将数据库 ID 注入 Payload
 	payload.AsyncTaskID = task.ID
@@ -329,6 +356,9 @@ func (s *TaskService) CreateGenerateFrameImageTask(adminID, projectID, shotID ui
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 3. 将数据库 ID 注入 Payload
 	payload.AsyncTaskID = task.ID
@@ -357,6 +387,9 @@ func (s *TaskService) CreateGenerateVideoTask(adminID uint64, payload asynq.Gene
 		Payload:   string(payloadBytes),
 	}
 	task.Create()
+	if task.Reused {
+		return &task, nil
+	}
 
 	// 2. 将数据库生成的真实 TaskID 注入 Payload
 	payload.AsyncTaskID = task.ID
